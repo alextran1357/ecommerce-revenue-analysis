@@ -4,15 +4,23 @@
 
 This project analyzes multi-year ecommerce transaction data to understand revenue growth drivers, product mix trends, seasonality patterns, and pricing behavior. The dataset contains over **1.9 million order item records and more than 1 million orders**, providing a realistic simulation of production-scale ecommerce data.
 
-The analysis focuses on identifying business risks and opportunities through structured data modeling, exploratory analysis, and dashboard reporting.
+The project follows a full data workflow including **data engineering, exploratory analysis, dashboard reporting, and predictive modeling** to transform raw ecommerce transaction data into actionable business insights.
 
 ### Key Findings
 
-- **Strong revenue growth:** Total revenue increased from approximately **$7.1M in 2022 to \$37.7M in 2025**, indicating rapid scaling of the business.
+- **Strong revenue growth:** Total revenue increased from approximately **\$7.1M in 2022 to \$37.7M in 2025**, indicating rapid scaling of the business.
 - **High product concentration:** Approximately **76% of total revenue is driven by a single product category (Gummies)**, creating significant dependency on one product line.
 - **Strong seasonal demand:** Revenue is heavily concentrated in **Q4 (≈35% of yearly revenue)**, driven by holiday purchasing behavior.
 - **Price changes across product lines:** Capsule prices dropped significantly between **Nov 2025 and Jan 2026**, while oil product prices gradually normalized from ~\$85 to ~\$55.
 - **Promotional items in data:** Nearly **500k transactions show \$0 pricing**, largely representing promotional or free items (cards, influencer boxes, stickers).
+
+### Forecasting Insights
+
+A time-series forecasting model was developed using **Prophet** to estimate future revenue trends.
+
+The model captures long-term revenue growth and seasonal purchasing patterns, achieving approximately **15–18% forecasting error (MAPE)** under cross-validation.
+
+Residual diagnostics revealed that the largest forecasting errors occur during **short-lived promotional events**, particularly in late November. These spikes correspond with increased discount activity and marketing campaigns, indicating that **promotion-driven demand volatility is a key driver of revenue fluctuations**.
 
 ### Business Implications
 
@@ -20,12 +28,11 @@ These findings highlight several potential operational risks and strategic oppor
 
 - **Product concentration risk** if demand for the primary product category declines.
 - **Seasonal revenue volatility** due to heavy reliance on holiday demand.
+- **Promotion-driven demand spikes** that create forecasting uncertainty.
 - **Potential margin pressure** resulting from price adjustments in key product categories.
 - **Data quality considerations** when analyzing promotional products and $0 transactions.
 
-This project demonstrates how analysts can transform raw ecommerce transaction data into actionable business insights through structured data cleaning, modeling, and exploratory analysis.
-
-Future phases of this project will extend the analysis into **predictive modeling and forecasting**, transitioning the work from descriptive analytics toward data science.
+This project demonstrates how analysts can transform raw ecommerce transaction data into business insights while also building predictive models to forecast future performance.
 
 ## Dashboard Highlights
 
@@ -273,36 +280,117 @@ Example dashboard views include:
 - Order count by product type
 
 ---
+# Data Science: Revenue Forecasting
 
-# Future Work (Data Science Phase)
+## Objective
 
-This project will be extended with predictive modeling and deeper behavioral analysis.
+Following exploratory analysis of revenue trends and seasonality, a forecasting model was developed to estimate future revenue growth and evaluate how well historical patterns explain demand.
 
-Planned extensions include:
+The goals of this modeling phase were to:
 
-## Revenue Forecasting
-
-- SARIMA / Prophet time-series forecasting
-- Holiday demand modeling
-
-## Customer Analysis
-
-- Customer cohort analysis
-- Repeat purchase modeling
-- Customer lifetime value estimation
-
-## Product Demand Modeling
-
-- Price elasticity estimation
-- Product substitution analysis
-
-## Risk Simulation
-
-- Monte Carlo simulation of seasonal revenue variability
-
-These additions will transition the project from **descriptive analytics → predictive analytics**.
+- Forecast future ecommerce revenue
+- Evaluate forecasting accuracy
+- Diagnose where the model fails
+- Identify drivers of demand volatility
 
 ---
+
+## Forecasting Method
+
+Revenue forecasting was performed using **Prophet**, a time-series forecasting library designed for business data with strong seasonal patterns.
+
+Daily revenue was aggregated from item-level transactions and used as the input time series.
+
+Prophet decomposes the time series into several components:
+```
+Revenue =
+Trend
+ + Weekly Seasonality
+ + Yearly Seasonality
+ + Residual Noise
+```
+
+This allows the model to capture:
+
+- long-term revenue growth
+- weekly purchasing behavior
+- yearly holiday demand cycles
+
+---
+
+## Model Evaluation
+
+Forecast accuracy was evaluated using Prophet's **time-series cross-validation**, which repeatedly trains the model on historical windows and predicts future periods.
+
+Key evaluation metrics included:
+
+| Metric | Description |
+|------|------|
+| MAE | Average absolute forecast error |
+| RMSE | Root mean squared error (penalizes large mistakes) |
+| MAPE | Mean absolute percentage error |
+| Coverage | Percentage of observations within forecast intervals |
+
+Example results from cross-validation:
+```
+MAPE ≈ 15–18%
+MAE ≈ $11k–$13k average daily error
+Coverage ≈ 80–85%
+```
+
+These results indicate the model predicts daily revenue within roughly **15–18% error**, which is typical for volatile retail demand.
+
+---
+
+## Residual Analysis
+
+Residual diagnostics revealed several extreme outliers where:
+```
+Actual Revenue >> Predicted Revenue
+```
+
+
+These events correspond to **large demand spikes that the model failed to anticipate**.
+
+Further investigation showed that these spikes consistently occur during **late November and early December**.
+
+---
+
+## Promotional Demand Effects
+
+Earlier analysis of order behavior revealed that **discounted transactions increase significantly during the same period**.
+
+This suggests that:
+```
+Promotional campaigns drive short-lived demand spikes
+```
+
+Because the baseline Prophet model only captures **trend and seasonal patterns**, it cannot anticipate these promotion-driven events.
+
+This explains the large positive residuals observed during peak demand days.
+
+---
+
+## Forecast Interpretation
+
+Although individual daily predictions can contain large errors during promotional events, the model performs well when revenue is aggregated over longer periods.
+
+When forecasts are grouped by month, the model captures overall revenue growth and seasonal demand patterns effectively.
+
+For strategic planning, **monthly and yearly forecasts provide more reliable insight than individual daily predictions**.
+
+---
+
+## Key Modeling Insight
+
+The forecasting model successfully captures long-term revenue growth and seasonal demand patterns but underestimates short-term spikes caused by promotional activity.
+
+This highlights an important limitation of baseline time-series models:
+
+> Revenue volatility in ecommerce is often driven by marketing campaigns and promotional events that are not encoded in historical seasonality.
+
+Incorporating promotional indicators or marketing campaign data would likely improve forecast accuracy.
+
 
 # Key Skills Demonstrated
 
